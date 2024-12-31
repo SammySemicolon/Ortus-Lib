@@ -207,7 +207,7 @@ public class VecHelper {
 
     public static class Vector4fHelper {
         public static void perspectiveDivide(Vector4f v) {
-            v.div(v.x, v.y, v.z, 1.0f);
+            v.div(v.w);
         }
     }
 
