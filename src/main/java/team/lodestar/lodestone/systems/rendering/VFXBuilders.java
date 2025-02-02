@@ -20,8 +20,7 @@ import team.lodestar.lodestone.handlers.RenderHandler;
 import team.lodestar.lodestone.helpers.RenderHelper;
 import team.lodestar.lodestone.helpers.VecHelper;
 import team.lodestar.lodestone.systems.rendering.cube.CubeVertexData;
-import team.lodestar.lodestone.systems.rendering.trail.TrailPoint;
-import team.lodestar.lodestone.systems.rendering.trail.TrailRenderPoint;
+import team.lodestar.lodestone.systems.rendering.trail.*;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -266,6 +265,8 @@ public class VFXBuilders {
         protected VertexFormat format;
         protected VertexConsumerActor supplier;
         protected VertexConsumer vertexConsumer;
+        protected boolean usePartialTicks;
+        protected float partialTicks;
 
         protected HashMap<Object, Consumer<WorldVFXBuilder>> modularActors = new HashMap<>();
         protected int modularActorAddIndex;
@@ -320,8 +321,14 @@ public class VFXBuilders {
             return vertexConsumer;
         }
 
+        public WorldVFXBuilder usePartialTicks(float partialTicks) {
+            this.usePartialTicks = true;
+            this.partialTicks = partialTicks;
+            return this;
+        }
+
         public WorldVFXBuilder addModularActor(Consumer<WorldVFXBuilder> actor) {
-            return addModularActor(modularActorAddIndex, actor);
+            return addModularActor(modularActorAddIndex++, actor);
         }
 
         public WorldVFXBuilder addModularActor(Object key, Consumer<WorldVFXBuilder> actor) {
@@ -436,43 +443,44 @@ public class VFXBuilders {
             return this;
         }
 
-        public WorldVFXBuilder renderTrail(PoseStack stack, List<TrailPoint> trailSegments, float width) {
-            return renderTrail(stack, trailSegments, f -> width, f -> {
+        public WorldVFXBuilder renderTrail(PoseStack stack, TrailPointBuilder trailPoints, float width) {
+            return renderTrail(stack, trailPoints, f -> width, f -> {
             });
         }
 
-        public WorldVFXBuilder renderTrail(PoseStack stack, List<TrailPoint> trailSegments, Function<Float, Float> widthFunc) {
-            return renderTrail(stack, trailSegments, widthFunc, f -> {
+        public WorldVFXBuilder renderTrail(PoseStack stack, TrailPointBuilder trailPoints, Function<Float, Float> widthFunc) {
+            return renderTrail(stack, trailPoints, widthFunc, f -> {
             });
         }
 
-        public WorldVFXBuilder renderTrail(PoseStack stack, List<TrailPoint> trailSegments, Function<Float, Float> widthFunc, Consumer<Float> vfxOperator) {
-            return renderTrail(stack.last().pose(), trailSegments, widthFunc, vfxOperator);
+        public WorldVFXBuilder renderTrail(PoseStack stack, TrailPointBuilder trailPoints, Function<Float, Float> widthFunc, Consumer<Float> vfxOperator) {
+            return renderTrail(stack.last().pose(), trailPoints, widthFunc, vfxOperator);
         }
 
-        public WorldVFXBuilder renderTrail(Matrix4f pose, List<TrailPoint> trailSegments, Function<Float, Float> widthFunc, Consumer<Float> vfxOperator) {
-            if (trailSegments.size() < 2) {
+        public WorldVFXBuilder renderTrail(Matrix4f pose, TrailPointBuilder builder, Function<Float, Float> widthFunc, Consumer<Float> vfxOperator) {
+            final List<TrailPoint> trailPoints = builder.getTrailPoints();
+            if (trailPoints.size() < 2) {
                 return this;
             }
-            List<Vector4f> positions = trailSegments.stream().map(TrailPoint::getMatrixPosition).peek(p -> p.mul(pose)).toList();
-            int count = trailSegments.size() - 1;
+            List<Vector4f> positions = usePartialTicks ? builder.build(pose, partialTicks) : builder.build(pose);
+            int count = trailPoints.size() - 1;
             float increment = 1.0F / count;
-            TrailRenderPoint[] points = new TrailRenderPoint[trailSegments.size()];
+            TrailPointRenderData[] renderData = new TrailPointRenderData[trailPoints.size()];
             for (int i = 1; i < count; i++) {
                 float width = widthFunc.apply(increment * i);
                 Vector4f previous = positions.get(i - 1);
                 Vector4f current = positions.get(i);
                 Vector4f next = positions.get(i + 1);
-                points[i] = new TrailRenderPoint(current, RenderHelper.perpendicularTrailPoints(previous, next, width));
+                renderData[i] = new TrailPointRenderData(current, RenderHelper.perpendicularTrailPoints(previous, next, width));
             }
-            points[0] = new TrailRenderPoint(positions.get(0),
+            renderData[0] = new TrailPointRenderData(positions.get(0),
                     RenderHelper.perpendicularTrailPoints(positions.get(0), positions.get(1), widthFunc.apply(0f)));
-            points[count] = new TrailRenderPoint(positions.get(count),
+            renderData[count] = new TrailPointRenderData(positions.get(count),
                     RenderHelper.perpendicularTrailPoints(positions.get(count - 1), positions.get(count), widthFunc.apply(1f)));
-            return renderPoints(points, u0, v0, u1, v1, vfxOperator);
+            return renderPoints(renderData, u0, v0, u1, v1, vfxOperator);
         }
 
-        public WorldVFXBuilder renderPoints(TrailRenderPoint[] points, float u0, float v0, float u1, float v1, Consumer<Float> vfxOperator) {
+        public WorldVFXBuilder renderPoints(TrailPointRenderData[] points, float u0, float v0, float u1, float v1, Consumer<Float> vfxOperator) {
             int count = points.length - 1;
             float increment = 1.0F / count;
             vfxOperator.accept(0f);

@@ -1,7 +1,8 @@
 package team.lodestar.lodestone.systems.rendering.trail;
 
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector4f;
+import org.joml.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 public class TrailPointBuilder {
 
     private final List<TrailPoint> trailPoints = new ArrayList<>();
+    private Vec3 origin;
     public final Supplier<Integer> trailLength;
 
     public TrailPointBuilder(Supplier<Integer> trailLength) {
@@ -29,30 +31,24 @@ public class TrailPointBuilder {
         return trailPoints;
     }
 
-    public List<TrailPoint> getTrailPoints(float lerp) {
-        List<TrailPoint> lerpedTrailPoints = new ArrayList<>();
-        final int size = trailPoints.size();
-        if (size > 1) {
-            for (int i = 0; i < size - 2; i++) {
-                lerpedTrailPoints.add(trailPoints.get(i).lerp(trailPoints.get(i + 1), lerp));
-            }
-        }
-        return lerpedTrailPoints;
-    }
-
     public TrailPointBuilder addTrailPoint(Vec3 point) {
         return addTrailPoint(new TrailPoint(point, 0));
     }
 
     public TrailPointBuilder addTrailPoint(TrailPoint point) {
         trailPoints.add(point);
+        return setOrigin(point.getPosition());
+    }
+
+    public TrailPointBuilder setOrigin(Vec3 origin) {
+        this.origin = origin;
         return this;
     }
 
     public TrailPointBuilder tickTrailPoints() {
-        int length = trailLength.get();
+        int lifespan = trailLength.get();
         trailPoints.forEach(TrailPoint::tick);
-        trailPoints.removeIf(p -> p.getAge() > length);
+        trailPoints.removeIf(p -> p.getAge() > lifespan);
         return this;
     }
 
@@ -61,7 +57,11 @@ public class TrailPointBuilder {
         return this;
     }
 
-    public List<Vector4f> build() {
-        return trailPoints.stream().map(TrailPoint::getMatrixPosition).collect(Collectors.toList());
+    public List<Vector4f> build(Matrix4f pose) {
+        return trailPoints.stream().map(p -> p.getMatrixPosition(pose)).collect(Collectors.toList());
+    }
+
+    public List<Vector4f> build(Matrix4f pose, float partialTicks) {
+        return trailPoints.stream().map(p -> p.getInterpolatedMatrixPosition(pose, partialTicks)).collect(Collectors.toList());
     }
 }

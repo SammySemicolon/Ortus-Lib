@@ -1,9 +1,10 @@
 package team.lodestar.lodestone.systems.rendering.trail;
 
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector4f;
+import org.joml.*;
 
 public class TrailPoint {
+    private Vec3 oldPosition;
     private Vec3 position;
     private int age;
 
@@ -16,16 +17,29 @@ public class TrailPoint {
         this(position, 0);
     }
 
-    public Vector4f getMatrixPosition() {
+    public Vector4f getMatrixPosition(Matrix4f pose) {
         Vec3 position = getPosition();
-        return new Vector4f((float) position.x, (float) position.y, (float) position.z, 1.0f);
+        return new Vector4f((float) position.x, (float) position.y, (float) position.z, 1.0f).mul(pose);
+    }
+
+    public Vector4f getInterpolatedMatrixPosition(Matrix4f pose, float partialTicks) {
+        Vec3 position = getInterpolatedPosition(partialTicks);
+        return new Vector4f((float) position.x, (float) position.y, (float) position.z, 1.0f).mul(pose);
     }
 
     public Vec3 getPosition() {
         return position;
     }
 
+    public Vec3 getInterpolatedPosition(float partialTicks) {
+        if (oldPosition == null) {
+            return position;
+        }
+        return oldPosition.lerp(position, partialTicks);
+    }
+
     public void setPosition(Vec3 position) {
+        this.oldPosition = this.position;
         this.position = position;
     }
 
@@ -35,11 +49,6 @@ public class TrailPoint {
 
     public int getAge() {
         return age;
-    }
-
-    public TrailPoint lerp(TrailPoint trailPoint, float delta) {
-        Vec3 position = getPosition();
-        return new TrailPoint(position.lerp(trailPoint.position, delta), age);
     }
 
     public void tick() {

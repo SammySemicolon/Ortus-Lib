@@ -5,7 +5,7 @@ import net.minecraft.world.phys.Vec2;
 import org.joml.Vector4f;
 import team.lodestar.lodestone.systems.rendering.VFXBuilders;
 
-public class TrailRenderPoint {
+public class TrailPointRenderData {
 
     public final float xp;
     public final float xn;
@@ -13,7 +13,7 @@ public class TrailRenderPoint {
     public final float yn;
     public final float z;
 
-    public TrailRenderPoint(float xp, float xn, float yp, float yn, float z) {
+    public TrailPointRenderData(float xp, float xn, float yp, float yn, float z) {
         this.xp = xp;
         this.xn = xn;
         this.yp = yp;
@@ -21,7 +21,7 @@ public class TrailRenderPoint {
         this.z = z;
     }
 
-    public TrailRenderPoint(Vector4f pos, Vec2 perp) {
+    public TrailPointRenderData(Vector4f pos, Vec2 perp) {
         this(pos.x() + perp.x, pos.x() - perp.x, pos.y() + perp.y, pos.y() - perp.y, pos.z());
     }
 
