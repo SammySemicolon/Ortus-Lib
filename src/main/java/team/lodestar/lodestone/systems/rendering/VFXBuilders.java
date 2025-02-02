@@ -463,7 +463,7 @@ public class VFXBuilders {
                 return this;
             }
             List<Vector4f> positions = usePartialTicks ? builder.build(pose, partialTicks) : builder.build(pose);
-            positions.getFirst().set(TrailPoint.getMatrixPosition(builder.getOrigin(), pose));
+            positions.getLast().set(TrailPoint.getMatrixPosition(builder.getOrigin(), pose));
             int count = trailPoints.size() - 1;
             float increment = 1.0F / count;
             TrailPointRenderData[] renderData = new TrailPointRenderData[trailPoints.size()];
