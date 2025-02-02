@@ -45,6 +45,10 @@ public class TrailPointBuilder {
         return this;
     }
 
+    public Vec3 getOrigin() {
+        return origin;
+    }
+
     public TrailPointBuilder tickTrailPoints() {
         int lifespan = trailLength.get();
         trailPoints.forEach(TrailPoint::tick);

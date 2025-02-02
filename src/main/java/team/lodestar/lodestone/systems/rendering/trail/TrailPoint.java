@@ -18,13 +18,11 @@ public class TrailPoint {
     }
 
     public Vector4f getMatrixPosition(Matrix4f pose) {
-        Vec3 position = getPosition();
-        return new Vector4f((float) position.x, (float) position.y, (float) position.z, 1.0f).mul(pose);
+        return getMatrixPosition(getPosition(), pose);
     }
 
     public Vector4f getInterpolatedMatrixPosition(Matrix4f pose, float partialTicks) {
-        Vec3 position = getInterpolatedPosition(partialTicks);
-        return new Vector4f((float) position.x, (float) position.y, (float) position.z, 1.0f).mul(pose);
+        return getMatrixPosition(getInterpolatedPosition(partialTicks), pose);
     }
 
     public Vec3 getPosition() {
@@ -53,5 +51,9 @@ public class TrailPoint {
 
     public void tick() {
         age++;
+    }
+
+    public static Vector4f getMatrixPosition(Vec3 position, Matrix4f pose) {
+        return new Vector4f((float) position.x, (float) position.y, (float) position.z, 1.0f).mul(pose);
     }
 }
