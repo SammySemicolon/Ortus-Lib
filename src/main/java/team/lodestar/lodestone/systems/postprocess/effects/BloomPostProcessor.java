@@ -1,26 +1,31 @@
 package team.lodestar.lodestone.systems.postprocess.effects;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.pipeline.TextureTarget;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EffectInstance;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL30;
 import team.lodestar.lodestone.LodestoneLib;
 import team.lodestar.lodestone.systems.postprocess.PostProcessor;
+import team.lodestar.lodestone.systems.texture.CustomizableTextureTarget;
+import team.lodestar.lodestone.systems.texture.InternalTextureFormat;
 
 public class BloomPostProcessor extends PostProcessor {
     private final RenderTarget bloomTarget;
     private final RenderStateShard.OutputStateShard bloomOutput;
 
     private EffectInstance bloomMask;
+    private RenderTarget bloomColor;
+    private RenderTarget blurSwap;
 
     private boolean forceDisabled;
 
     public BloomPostProcessor() {
         var window = Minecraft.getInstance().getWindow();
-        this.bloomTarget = new TextureTarget(window.getWidth(), window.getHeight(), true, Minecraft.ON_OSX);
+        this.bloomTarget = new CustomizableTextureTarget(window.getWidth(), window.getHeight(), true, InternalTextureFormat.RGBA16F);
         this.bloomTarget.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         this.bloomOutput = new RenderStateShard.OutputStateShard("bloomTarget",
                 () -> this.bloomTarget.bindWrite(false),
@@ -38,6 +43,8 @@ public class BloomPostProcessor extends PostProcessor {
         super.init();
         if (this.postChain != null) {
             this.bloomMask = effects[0];
+            this.bloomColor = this.postChain.getTempTarget("bloomColor");
+            this.blurSwap = this.postChain.getTempTarget("blurSwap");
         }
     }
 
@@ -70,5 +77,18 @@ public class BloomPostProcessor extends PostProcessor {
 
     public RenderStateShard.OutputStateShard getBloomOutput() {
         return bloomOutput;
+    }
+
+    public RenderTarget getBloomTarget() {
+        return bloomTarget;
+    }
+
+    public void copyDepthFromMain() {
+        this.copyDepthFrom(Minecraft.getInstance().getMainRenderTarget());
+    }
+
+    public void copyDepthFrom(RenderTarget src) {
+        this.bloomTarget.copyDepthFrom(src);
+        GlStateManager._glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, src.frameBufferId);
     }
 }

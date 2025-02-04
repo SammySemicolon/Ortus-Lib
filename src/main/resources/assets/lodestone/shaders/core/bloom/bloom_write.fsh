@@ -11,5 +11,8 @@ in vec4 vertexColor;
 out vec4 fragColor;
 
 void main() {
-    fragColor = vec4(0.3, 0.0, 1.0, 1.0);
+    float brightness = 5.0f;
+    vec3 color = vec3(0.3, 0.3, 1.0);
+    vec3 bloomColor = color * brightness;
+    fragColor = vec4(bloomColor, 1.0);
 }

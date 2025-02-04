@@ -1,6 +1,7 @@
 package team.lodestar.lodestone.systems.postprocess;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -29,6 +30,11 @@ public class PostProcessHandler {
         instances.add(instance);
     }
 
+    public static void render() {
+        instances.forEach(PostProcessor::applyPostProcess);
+        Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
+    }
+
     public static void copyDepthBuffer() {
         if (didCopyDepth) return;
         instances.forEach(PostProcessor::copyDepthBuffer);
@@ -47,7 +53,7 @@ public class PostProcessHandler {
         if (event.getStage().equals(RenderLevelStageEvent.Stage.AFTER_LEVEL)) {
             copyDepthBuffer(); // copy the depth buffer if the mixin didn't trigger
 
-            instances.forEach(PostProcessor::applyPostProcess);
+            render();
 
             didCopyDepth = false; // reset for next frame
         }

@@ -60,3 +60,11 @@ vec4 applyFog(vec4 initialColor, float fogStart, float fogEnd, vec4 fogColor, fl
 float fogDistance(vec3 Position, int FogShape) {
     return fog_distance(Position, FogShape);
 }
+
+vec4 quantize(vec4 color, float levels) {
+    return floor(color*(levels-1)+0.5)/(levels-1);
+}
+
+vec3 quantize(vec3 color, float levels) {
+    return floor(color*(levels-1)+0.5)/(levels-1);
+}

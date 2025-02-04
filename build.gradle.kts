@@ -122,6 +122,10 @@ repositories {
         name = "Curios maven"
         url = uri("https://maven.theillusivec4.top/")
     }
+    maven {
+        name = "Modrinth maven"
+        url = uri("https://api.modrinth.com/maven")
+    }
 }
 
 dependencies {
@@ -129,6 +133,11 @@ dependencies {
     localRuntime("top.theillusivec4.curios:curios-neoforge:${property("curios_version")}")
 
 //    runtimeOnly(("com.sammy.malum:malum:${property("minecraft_version")}-1.7.0.144"))
+
+    compileOnly("maven.modrinth:sodium:mc${property("minecraft_version")}-${property("sodium_version")}-neoforge")
+    compileOnly("maven.modrinth:iris:${property("iris_version")}+${property("minecraft_version")}-neoforge")
+    //runtimeOnly("maven.modrinth:sodium:mc${property("minecraft_version")}-${property("sodium_version")}-neoforge")
+    //runtimeOnly("maven.modrinth:iris:${property("iris_version")}+${property("minecraft_version")}-neoforge")
 }
 val generateModMetadata by tasks.registering(ProcessResources::class) {
     val replaceProperties = mapOf(

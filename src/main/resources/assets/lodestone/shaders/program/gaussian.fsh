@@ -18,10 +18,15 @@ const float weights[5] = float[](
 
 void main() {
     vec2 dir = vec2(1.0-Direction, Direction);
+    dir *= oneTexel;
+
     vec4 result = texture(DiffuseSampler, texCoord) * weights[0];
     for (int i = 1; i < 5; i++) {
-        result += texture(DiffuseSampler, texCoord + (dir * oneTexel * float(i))) * weights[i];
-        result += texture(DiffuseSampler, texCoord - (dir * oneTexel * float(i))) * weights[i];
+        vec2 offset = dir * float(i);
+        float weight = weights[i];
+
+        result += texture(DiffuseSampler, texCoord + offset) * weight;
+        result += texture(DiffuseSampler, texCoord - offset) * weight;
     }
     fragColor = result;
 }

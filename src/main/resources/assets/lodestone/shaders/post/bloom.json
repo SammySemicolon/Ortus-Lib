@@ -1,8 +1,14 @@
 {
   "targets": [
     "depthMain",
-    "bloomColor",
-    "blurSwap",
+    {
+      "name": "bloomColor",
+      "format": "RGBA16F"
+    },
+    {
+      "name": "blurSwap",
+      "format": "RGBA16F"
+    },
     "final"
   ],
   "passes": [
@@ -15,6 +21,7 @@
       "name": "lodestone:gaussian",
       "intarget": "bloomColor",
       "outtarget": "blurSwap",
+      "use_linear_filter": true,
       "uniforms": [
         {
           "name": "Direction",
@@ -26,6 +33,7 @@
       "name": "lodestone:gaussian",
       "intarget": "blurSwap",
       "outtarget": "bloomColor",
+      "use_linear_filter": true,
       "uniforms": [
         {
           "name": "Direction",
@@ -37,6 +45,7 @@
       "name": "lodestone:gaussian",
       "intarget": "bloomColor",
       "outtarget": "blurSwap",
+      "use_linear_filter": true,
       "uniforms": [
         {
           "name": "Direction",
@@ -48,6 +57,7 @@
       "name": "lodestone:gaussian",
       "intarget": "blurSwap",
       "outtarget": "bloomColor",
+      "use_linear_filter": true,
       "uniforms": [
         {
           "name": "Direction",
@@ -59,6 +69,7 @@
       "name": "lodestone:gaussian",
       "intarget": "bloomColor",
       "outtarget": "blurSwap",
+      "use_linear_filter": true,
       "uniforms": [
         {
           "name": "Direction",
@@ -70,6 +81,7 @@
       "name": "lodestone:gaussian",
       "intarget": "blurSwap",
       "outtarget": "bloomColor",
+      "use_linear_filter": true,
       "uniforms": [
         {
           "name": "Direction",
@@ -81,6 +93,7 @@
       "name": "lodestone:gaussian",
       "intarget": "bloomColor",
       "outtarget": "blurSwap",
+      "use_linear_filter": true,
       "uniforms": [
         {
           "name": "Direction",
@@ -92,6 +105,7 @@
       "name": "lodestone:gaussian",
       "intarget": "blurSwap",
       "outtarget": "bloomColor",
+      "use_linear_filter": true,
       "uniforms": [
         {
           "name": "Direction",
@@ -103,6 +117,7 @@
       "name": "lodestone:gaussian",
       "intarget": "bloomColor",
       "outtarget": "blurSwap",
+      "use_linear_filter": true,
       "uniforms": [
         {
           "name": "Direction",
@@ -114,28 +129,7 @@
       "name": "lodestone:gaussian",
       "intarget": "blurSwap",
       "outtarget": "bloomColor",
-      "uniforms": [
-        {
-          "name": "Direction",
-          "values": [1.0]
-        }
-      ]
-    },
-    {
-      "name": "lodestone:gaussian",
-      "intarget": "bloomColor",
-      "outtarget": "blurSwap",
-      "uniforms": [
-        {
-          "name": "Direction",
-          "values": [0.0]
-        }
-      ]
-    },
-    {
-      "name": "lodestone:gaussian",
-      "intarget": "blurSwap",
-      "outtarget": "bloomColor",
+      "use_linear_filter": true,
       "uniforms": [
         {
           "name": "Direction",
@@ -147,6 +141,7 @@
       "name": "lodestone:blend",
       "intarget": "minecraft:main",
       "outtarget": "final",
+      "use_linear_filter": true,
       "auxtargets": [
         {
           "name": "BlendSampler",
