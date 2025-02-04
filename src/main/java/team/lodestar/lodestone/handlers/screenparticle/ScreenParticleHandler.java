@@ -77,10 +77,10 @@ public class ScreenParticleHandler {
                     currentItemY = y + yOffset;
 
                     if (currentItemX == 8 && currentItemY == 8) {
-                        float xOffsetf = pose.m30();
-                        float yOffsetf = pose.m31();
-                        currentItemX += xOffsetf;
-                        currentItemY += yOffsetf;
+                        int poseOffsetX = (int) pose.m30();
+                        int poseOffsetY = (int) pose.m31();
+                        currentItemX += poseOffsetX;
+                        currentItemY += poseOffsetY;
                     }
                     else if (!renderingHotbar && minecraft.screen instanceof AbstractContainerScreen<?> containerScreen) {
                         //currentItemX += containerScreen.getGuiLeft();
