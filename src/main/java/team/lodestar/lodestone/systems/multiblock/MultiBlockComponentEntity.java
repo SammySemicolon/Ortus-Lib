@@ -1,7 +1,6 @@
 package team.lodestar.lodestone.systems.multiblock;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.core.*;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.*;
 import net.minecraft.world.InteractionHand;
@@ -9,17 +8,20 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.*;
+import net.minecraft.world.level.block.entity.*;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.capabilities.*;
+import net.neoforged.neoforge.items.*;
 import org.jetbrains.annotations.Nullable;
 import team.lodestar.lodestone.helpers.*;
 import team.lodestar.lodestone.registry.common.*;
-import team.lodestar.lodestone.systems.blockentity.LodestoneBlockEntity;
+import team.lodestar.lodestone.systems.blockentity.*;
 
 /**
  * A basic Multiblock component block entity. Defers some important actions to the core of the multiblock.
  */
-public class MultiBlockComponentEntity extends LodestoneBlockEntity {
+public class MultiBlockComponentEntity extends LodestoneBlockEntity implements IItemHandlerSupplier {
 
     public BlockPos corePos;
 
@@ -29,6 +31,14 @@ public class MultiBlockComponentEntity extends LodestoneBlockEntity {
 
     public MultiBlockComponentEntity(BlockPos pos, BlockState state) {
         super(LodestoneBlockEntities.MULTIBLOCK_COMPONENT.get(), pos, state);
+    }
+
+    @Override
+    public IItemHandler getInventory(Direction direction) {
+        if (corePos != null && level.getBlockEntity(corePos) instanceof MultiBlockCoreEntity core && core instanceof IItemHandlerSupplier supplier) {
+            return supplier.getInventory(direction);
+        }
+        return null;
     }
 
     @Override
@@ -76,6 +86,4 @@ public class MultiBlockComponentEntity extends LodestoneBlockEntity {
         }
         super.onBreak(player);
     }
-
-    //TODO caps?
 }
