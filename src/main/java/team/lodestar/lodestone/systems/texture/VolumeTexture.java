@@ -1,6 +1,8 @@
 package team.lodestar.lodestone.systems.texture;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -21,11 +23,17 @@ public class VolumeTexture extends AbstractTexture {
     protected final ResourceLocation location;
     private final int xSlices, ySlices;
     private int width, height, depth;
+    private boolean linear;
 
     public VolumeTexture(ResourceLocation location, int xSlices, int ySlices) {
+        this(location, xSlices, ySlices, false);
+    }
+
+    public VolumeTexture(ResourceLocation location, int xSlices, int ySlices, boolean linear) {
         this.location = location;
         this.xSlices = xSlices;
         this.ySlices = ySlices;
+        this.linear = linear;
     }
 
     @Override
@@ -55,8 +63,8 @@ public class VolumeTexture extends AbstractTexture {
                 glBindTexture(GL_TEXTURE_3D, this.id);
                 glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
                 glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, this.width, this.height, this.depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, volume);
-                glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, this.linear ? GL_LINEAR : GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, this.linear ? GL_LINEAR : GL_NEAREST);
                 glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
                 glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
                 glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
@@ -71,6 +79,26 @@ public class VolumeTexture extends AbstractTexture {
     @Override
     public void bind() {
         LodestoneRenderSystem.wrap(() -> glBindTexture(GL_TEXTURE_3D, this.id));
+    }
+
+    @Override
+    public void setFilter(boolean blur, boolean mipmap) {
+        RenderSystem.assertOnRenderThreadOrInit();
+        this.blur = blur;
+        this.mipmap = mipmap;
+        int i;
+        short j;
+        if (blur) {
+            i = mipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR;
+            j = GL_LINEAR;
+        } else {
+            i = mipmap ? GL_NEAREST_MIPMAP_LINEAR : GL_NEAREST;
+            j = GL_NEAREST;
+        }
+
+        this.bind();
+        GlStateManager._texParameter(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, i);
+        GlStateManager._texParameter(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, j);
     }
 
     public int getWidth() {
