@@ -12,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.items.*;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
@@ -19,11 +20,16 @@ import javax.annotation.Nonnull;
 /**
  * A simple block entity which holds a single ItemStack
  */
-public abstract class ItemHolderBlockEntity extends LodestoneBlockEntity {
+public abstract class ItemHolderBlockEntity extends LodestoneBlockEntity implements IItemHandlerSupplier {
     public LodestoneBlockEntityInventory inventory;
 
     public ItemHolderBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+    }
+    
+    @Override
+    public IItemHandler getInventory(Direction direction) {
+        return inventory;
     }
 
     @Override
