@@ -57,6 +57,18 @@ public class ColorParticleData {
         return Mth.clamp((age * colorCoefficient * coefficientMultiplier) / lifetime, 0, 1);
     }
 
+    public Color getStartingColor() {
+        return new Color(r1, g1, b1);
+    }
+
+    public Color getEndingColor() {
+        return new Color(r2, g2, b2);
+    }
+
+    public ColorParticleDataBuilder invert() {
+        return create(r2, g2, b2, r1, g1, b1).setCoefficient(colorCoefficient).setEasing(colorCurveEasing);
+    }
+
     public ColorParticleDataBuilder copy() {
         return create(r1, g1, b1, r2, g2, b2).setCoefficient(colorCoefficient).setEasing(colorCurveEasing);
     }
