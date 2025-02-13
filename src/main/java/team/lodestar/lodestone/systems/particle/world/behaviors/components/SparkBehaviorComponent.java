@@ -8,6 +8,7 @@ import team.lodestar.lodestone.systems.particle.world.behaviors.*;
 public class SparkBehaviorComponent implements LodestoneBehaviorComponent {
 
     protected final GenericParticleData lengthData;
+    protected Vec3 forcedDirection;
     protected Vec3 cachedDirection;
 
     public SparkBehaviorComponent(GenericParticleData lengthData) {
@@ -26,11 +27,19 @@ public class SparkBehaviorComponent implements LodestoneBehaviorComponent {
         }
     }
 
+    public SparkBehaviorComponent setForcedDirection(Vec3 forcedDirection) {
+        this.forcedDirection = forcedDirection;
+        return this;
+    }
+
     public GenericParticleData getLengthData(LodestoneWorldParticle particle) {
         return getLengthData() != null ? getLengthData() : particle.scaleData;
     }
 
     public Vec3 getDirection(LodestoneWorldParticle particle) {
+        if (forcedDirection != null) {
+            return forcedDirection;
+        }
         return getCachedDirection() != null ? getCachedDirection() : particle.getParticleSpeed().normalize();
     }
 
