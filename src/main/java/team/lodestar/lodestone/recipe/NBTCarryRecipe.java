@@ -4,13 +4,10 @@ import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.*;
 import net.minecraft.core.*;
 import net.minecraft.core.component.*;
-import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.network.*;
 import net.minecraft.network.codec.*;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
-import team.lodestar.lodestone.recipe.builder.LodestoneShapedRecipeBuilder;
 import team.lodestar.lodestone.registry.common.LodestoneRecipeSerializers;
 
 import javax.annotation.Nonnull;
@@ -20,24 +17,27 @@ public class NBTCarryRecipe extends ShapedRecipe {
 
     public final Ingredient copyFrom;
 
-    public NBTCarryRecipe(ShapedRecipe compose, Ingredient copyFrom) {
-        super(compose.getGroup(), compose.category(), compose.pattern, compose.result, compose.showNotification());
+    public NBTCarryRecipe(ShapedRecipe recipe, Ingredient copyFrom) {
+        super(recipe.getGroup(), recipe.category(), recipe.pattern, recipe.result, recipe.showNotification());
         this.copyFrom = copyFrom;
     }
 
     @Override
-    public ItemStack assemble(CraftingInput pInput, HolderLookup.Provider pRegistries) {
-        ItemStack out = super.assemble(pInput, pRegistries);
-        for (int i = 0; i < pInput.size(); i++) {
-            ItemStack stack = pInput.getItem(i);
-            if (!stack.isEmpty() && copyFrom.test(stack) && !stack.getComponents().isEmpty()) {
+    public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {
+        var output = super.assemble(craftingInput, provider);
+        for (int i = 0; i < craftingInput.size(); i++) {
+            ItemStack stack = craftingInput.getItem(i);
+            if (stack.isEmpty()) {
+                continue;
+            }
+            if (copyFrom.test(stack) && !stack.getComponents().isEmpty()) {
                 for (TypedDataComponent<?> component : stack.getComponents()) {
-                    out.copyFrom(stack, component.type());
+                    output.copyFrom(stack, component.type());
                 }
                 break;
             }
         }
-        return out;
+        return output;
     }
 
     @Nonnull
@@ -75,20 +75,6 @@ public class NBTCarryRecipe extends ShapedRecipe {
         public static void toNetwork(RegistryFriendlyByteBuf byteBuf, @Nonnull NBTCarryRecipe recipe) {
             ShapedRecipe.Serializer.STREAM_CODEC.encode(byteBuf, recipe);
             Ingredient.CONTENTS_STREAM_CODEC.encode(byteBuf, recipe.copyFrom);
-        }
-    }
-
-    public static class Builder extends LodestoneShapedRecipeBuilder {
-        Ingredient copyFrom;
-
-        public Builder(ShapedRecipeBuilder parent, Ingredient copyFrom) {
-            super(parent);
-            this.copyFrom = copyFrom;
-        }
-
-        @Override
-        public ShapedRecipe build(ResourceLocation id) {
-            return new NBTCarryRecipe(super.build(id), this.copyFrom);
         }
     }
 }
