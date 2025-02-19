@@ -40,7 +40,7 @@ public interface LodestoneRecipeBuilder<R extends Recipe<?>> {
         if (!subfolder.isEmpty()) {
             subfolder += "/";
         }
-        consumer.accept(id, recipe, advancement.build(id.withPrefix("recipes/" + subfolder)));
+        consumer.accept(id.withPrefix(subfolder), recipe, advancement.build(id.withPrefix("recipes/" + subfolder)));
     }
 
     default String getRecipeSubfolder() {
